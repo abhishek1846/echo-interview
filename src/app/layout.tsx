@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EchoInterview | Qualitative User Research",
-  description: "Autonomous voice discovery and friction extraction powered by AssemblyAI Speech Intelligence.",
+  title: "Kroma Audio | Precision Planar Acoustics",
+  description: "Precision open-back planar headphones and reference audio hardware with customer feedback powered by AssemblyAI.",
 };
 
 export default function RootLayout({
@@ -25,9 +25,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100 selection:bg-zinc-800 selection:text-white">
+      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 selection:bg-zinc-200 selection:text-zinc-900">
         {children}
       </body>
     </html>
