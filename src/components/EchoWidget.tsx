@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Check, X, ArrowUpRight, Loader2, Disc } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function EchoWidget({ productName = 'Gatsby Desktop' }: { productName?: string }) {
+export default function EchoWidget({ productName = 'Kroma Audio' }: { productName?: string }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [recordingState, setRecordingState] = useState<'idle' | 'recording' | 'processing' | 'done' | 'error'>('idle');

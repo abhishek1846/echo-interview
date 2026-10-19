@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const audioFile = formData.get('audio') as File | null;
-    const productName = (formData.get('product_name') as string) || 'Gatsby Desktop';
+    const productName = (formData.get('product_name') as string) || 'Kroma Audio';
 
     if (!audioFile) {
       return NextResponse.json({ error: 'No audio file provided' }, { status: 400 });

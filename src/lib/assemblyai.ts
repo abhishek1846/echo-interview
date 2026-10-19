@@ -6,7 +6,7 @@ const client = new AssemblyAI({ apiKey });
 
 export async function processAudioWithAssemblyAI(
   audioBuffer: Buffer,
-  productName: string = 'Gatsby Desktop'
+  productName: string = 'Kroma Audio'
 ): Promise<InterviewRecord> {
   // 1. Upload audio buffer directly to AssemblyAI
   console.log('[AssemblyAI] Uploading audio buffer (bytes:', audioBuffer.length, ')...');

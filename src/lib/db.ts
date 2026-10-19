@@ -5,132 +5,133 @@ import { InterviewRecord } from './types';
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'interviews.json');
 
-const INITIAL_SAMPLES: InterviewRecord[] = [
+const CONSUMER_SAMPLES: InterviewRecord[] = [
   {
-    id: 'intv_gatsby_01',
-    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-    duration_seconds: 78,
-    product_name: 'Gatsby Desktop',
-    transcript_text: 'I just imported about 40 EPUB books into Gatsby. The layout is super clean and I really liked that it automatically extracted the book covers. But when I plugged in my Kindle Paperwhite over USB, it took almost 15 seconds to detect it. I thought the app was frozen. I ended up opening Finder to check if the volume was mounted, and only after I refreshed the device status did it show up. Once it showed up, sending books was fast, but that initial lag was scary.',
-    summary: '- User imported 40 EPUB books and praised the clean layout and automatic cover extraction.\n- Encountered a 15-second delay detecting a USB-connected Kindle Paperwhite, causing them to believe the app was frozen.\n- User checked Finder as a workaround before manually refreshing the status.',
+    id: 'intv_kroma_01',
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    duration_seconds: 72,
+    product_name: 'Kroma Audio',
+    transcript_text: 'I was on your checkout page trying to order the Model-1 headphones and the extra leather ear cushions. When I added my address in Toronto, the shipping options did not show whether import customs and duties were included. I hesitated because with international audio gear, surprise duties can be another fifty dollars at the door. I ended up opening Reddit on my phone to search if anyone in Canada had ordered from Kroma before. Did not find an answer, so I left the cart open.',
+    summary: '- Shopper attempted to purchase the Model-1 headphones and leather ear cushions to Toronto, Canada.\n- Hesitated and abandoned checkout because duties and import taxes were not calculated at checkout.\n- Searched Reddit on mobile as an unprompted workaround before abandoning the cart.',
     utterances: [
       {
         speaker: 'A',
         start: 0,
-        end: 8500,
-        text: 'I just imported about 40 EPUB books into Gatsby. The layout is super clean and I really liked that it automatically extracted the book covers.'
+        end: 11000,
+        text: 'I was on your checkout page trying to order the Model-1 headphones and the extra leather ear cushions.'
       },
       {
         speaker: 'A',
-        start: 9000,
-        end: 22000,
-        text: 'But when I plugged in my Kindle Paperwhite over USB, it took almost 15 seconds to detect it. I thought the app was frozen.'
+        start: 11500,
+        end: 24000,
+        text: 'When I added my address in Toronto, the shipping options did not show whether import customs and duties were included.'
       },
       {
         speaker: 'A',
-        start: 22500,
-        end: 32000,
-        text: 'I ended up opening Finder to check if the volume was mounted, and only after I refreshed the device status did it show up.'
+        start: 24500,
+        end: 34000,
+        text: 'I hesitated because with international audio gear, surprise duties can be another fifty dollars at the door.'
       },
       {
         speaker: 'A',
-        start: 32500,
-        end: 41000,
-        text: 'Once it showed up, sending books was fast, but that initial lag was scary.'
+        start: 34500,
+        end: 46000,
+        text: 'I ended up opening Reddit on my phone to search if anyone in Canada had ordered from Kroma before. Did not find an answer, so I left the cart open.'
       }
     ],
     sentiment_results: [
-      { text: 'The layout is super clean and I really liked that it automatically extracted the book covers.', start: 0, end: 8500, sentiment: 'POSITIVE', confidence: 0.94 },
-      { text: 'But when I plugged in my Kindle Paperwhite over USB, it took almost 15 seconds to detect it.', start: 9000, end: 16000, sentiment: 'NEGATIVE', confidence: 0.88 },
-      { text: 'I thought the app was frozen.', start: 16500, end: 22000, sentiment: 'NEGATIVE', confidence: 0.92 },
-      { text: 'I ended up opening Finder to check if the volume was mounted, and only after I refreshed the device status did it show up.', start: 22500, end: 32000, sentiment: 'NEUTRAL', confidence: 0.85 },
-      { text: 'Once it showed up, sending books was fast, but that initial lag was scary.', start: 32500, end: 41000, sentiment: 'NEGATIVE', confidence: 0.79 }
+      { text: 'I was on your checkout page trying to order the Model-1 headphones and the extra leather ear cushions.', start: 0, end: 11000, sentiment: 'NEUTRAL', confidence: 0.95 },
+      { text: 'When I added my address in Toronto, the shipping options did not show whether import customs and duties were included.', start: 11500, end: 24000, sentiment: 'NEGATIVE', confidence: 0.89 },
+      { text: 'I hesitated because with international audio gear, surprise duties can be another fifty dollars at the door.', start: 24500, end: 34000, sentiment: 'NEGATIVE', confidence: 0.92 },
+      { text: 'I ended up opening Reddit on my phone to search if anyone in Canada had ordered from Kroma before.', start: 34500, end: 41000, sentiment: 'NEGATIVE', confidence: 0.78 },
+      { text: 'Did not find an answer, so I left the cart open.', start: 41500, end: 46000, sentiment: 'NEGATIVE', confidence: 0.91 }
     ],
     entities: [
-      { text: 'Gatsby', entity_type: 'organization' },
-      { text: 'EPUB', entity_type: 'product' },
-      { text: 'Kindle Paperwhite', entity_type: 'product' },
-      { text: 'USB', entity_type: 'product' },
-      { text: 'Finder', entity_type: 'product' }
+      { text: 'Model-1', entity_type: 'product' },
+      { text: 'Toronto', entity_type: 'location' },
+      { text: 'Reddit', entity_type: 'organization' },
+      { text: 'Kroma', entity_type: 'organization' }
     ],
     mom_test: {
-      task_attempted: 'Syncing sideloaded EPUB books to Kindle Paperwhite via USB',
+      task_attempted: 'Completing checkout for Model-1 headphones with international shipping to Canada',
       friction_points: [
-        '15-second latency before connected Kindle appeared in UI',
-        'Lack of active polling indicator led user to believe app froze'
+        'Shipping calculator failed to specify if customs/import taxes were prepaid or collected at door',
+        'Fear of surprise $50 customs fees caused immediate purchase hesitation'
       ],
       user_workarounds: [
-        'Opened macOS Finder to manually verify volume mount',
-        'Clicked manual refresh button repeatedly'
+        'Opened Reddit on mobile to search past buyer delivery experiences',
+        'Abandoned the checkout cart when no confirmation was found'
       ],
       sentiment_summary: {
-        positive: 1,
+        positive: 0,
         neutral: 1,
-        negative: 3,
+        negative: 4,
         overall: 'Frustrated'
       },
       key_quotes: [
-        { quote: 'I thought the app was frozen.', timestamp: '00:16', type: 'friction' },
-        { quote: 'I ended up opening Finder to check if the volume was mounted.', timestamp: '00:22', type: 'workaround' },
-        { quote: 'The layout is super clean and I really liked that it automatically extracted the book covers.', timestamp: '00:02', type: 'praise' }
+        { quote: 'The shipping options did not show whether import customs and duties were included.', timestamp: '00:12', type: 'friction' },
+        { quote: 'I ended up opening Reddit on my phone to search if anyone in Canada had ordered from Kroma before.', timestamp: '00:35', type: 'workaround' },
+        { quote: 'Did not find an answer, so I left the cart open.', timestamp: '00:41', type: 'friction' }
       ]
     }
   },
   {
-    id: 'intv_gatsby_02',
-    created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
-    duration_seconds: 64,
-    product_name: 'Gatsby Desktop',
-    transcript_text: 'I was trying to sort my books by date added, but clicking the header did not sort properly until I restarted the app. Also on the table rows, only the title text was clickable. I kept clicking the empty white space on the row to open the details pane and nothing happened. I had to aim my mouse precisely at the title.',
-    summary: '- User experienced issues sorting books by date added, requiring an app restart to function.\n- Reported difficulty clicking table rows, where only the text registered clicks rather than the full row space.',
+    id: 'intv_kroma_02',
+    created_at: new Date(Date.now() - 3600000 * 14).toISOString(),
+    duration_seconds: 58,
+    product_name: 'Kroma Audio',
+    transcript_text: 'The unboxing of the DAC-Mini was incredible, but when I paired it with my Mac, the sample rate defaulted to 44.1 kilohertz instead of high-res 192k. I had to go into Audio MIDI Setup in macOS to manually toggle the bitrate. A card in the box explaining that macOS requires a manual switch for lossless would have saved me thirty minutes of troubleshooting.',
+    summary: '- Customer praised the physical unboxing experience of the DAC-Mini.\n- Experienced confusion when macOS defaulted sample rate to 44.1kHz instead of advertised 192kHz.\n- Had to manually configure macOS Audio MIDI Setup as a workaround.',
     utterances: [
       {
         speaker: 'A',
         start: 0,
-        end: 12000,
-        text: 'I was trying to sort my books by date added, but clicking the header did not sort properly until I restarted the app.'
+        end: 9000,
+        text: 'The unboxing of the DAC-Mini was incredible, but when I paired it with my Mac, the sample rate defaulted to 44.1 kilohertz instead of high-res 192k.'
       },
       {
         speaker: 'A',
-        start: 12500,
-        end: 25000,
-        text: 'Also on the table rows, only the title text was clickable. I kept clicking the empty white space on the row to open the details pane and nothing happened.'
+        start: 9500,
+        end: 18000,
+        text: 'I had to go into Audio MIDI Setup in macOS to manually toggle the bitrate.'
       },
       {
         speaker: 'A',
-        start: 25500,
-        end: 33000,
-        text: 'I had to aim my mouse precisely at the title.'
+        start: 18500,
+        end: 32000,
+        text: 'A card in the box explaining that macOS requires a manual switch for lossless would have saved me thirty minutes of troubleshooting.'
       }
     ],
     sentiment_results: [
-      { text: 'I was trying to sort my books by date added, but clicking the header did not sort properly until I restarted the app.', start: 0, end: 12000, sentiment: 'NEGATIVE', confidence: 0.86 },
-      { text: 'I kept clicking the empty white space on the row to open the details pane and nothing happened.', start: 12500, end: 25000, sentiment: 'NEGATIVE', confidence: 0.91 },
-      { text: 'I had to aim my mouse precisely at the title.', start: 25500, end: 33000, sentiment: 'NEGATIVE', confidence: 0.82 }
+      { text: 'The unboxing of the DAC-Mini was incredible.', start: 0, end: 4000, sentiment: 'POSITIVE', confidence: 0.96 },
+      { text: 'The sample rate defaulted to 44.1 kilohertz instead of high-res 192k.', start: 4500, end: 9000, sentiment: 'NEGATIVE', confidence: 0.84 },
+      { text: 'I had to go into Audio MIDI Setup in macOS to manually toggle the bitrate.', start: 9500, end: 18000, sentiment: 'NEUTRAL', confidence: 0.88 },
+      { text: 'A card in the box explaining that macOS requires a manual switch would have saved me thirty minutes.', start: 18500, end: 32000, sentiment: 'NEGATIVE', confidence: 0.81 }
     ],
     entities: [
-      { text: 'books', entity_type: 'product' },
-      { text: 'table rows', entity_type: 'concept' }
+      { text: 'DAC-Mini', entity_type: 'product' },
+      { text: 'Mac', entity_type: 'product' },
+      { text: 'Audio MIDI Setup', entity_type: 'product' }
     ],
     mom_test: {
-      task_attempted: 'Sorting library by date and clicking rows to inspect book metadata',
+      task_attempted: 'Setting up DAC-Mini for lossless 192kHz audio playback on macOS',
       friction_points: [
-        'Date added sorting did not immediately re-render table',
-        'WebKit row hit-target collapsed to text-only geometry'
+        'Device defaulted to standard 44.1kHz bitrate without onboarding cue',
+        'User spent 30 minutes troubleshooting missing lossless output'
       ],
       user_workarounds: [
-        'Restarted the app to refresh sorted state',
-        'Carefully aimed cursor directly on font glyphs'
+        'Manually dug into macOS Audio MIDI Setup utility to configure bit depth'
       ],
       sentiment_summary: {
-        positive: 0,
-        neutral: 0,
-        negative: 3,
+        positive: 1,
+        neutral: 1,
+        negative: 2,
         overall: 'Frustrated'
       },
       key_quotes: [
-        { quote: 'I kept clicking the empty white space on the row and nothing happened.', timestamp: '00:15', type: 'friction' },
-        { quote: 'I had to aim my mouse precisely at the title.', timestamp: '00:26', type: 'friction' }
+        { quote: 'The unboxing of the DAC-Mini was incredible.', timestamp: '00:01', type: 'praise' },
+        { quote: 'I had to go into Audio MIDI Setup in macOS to manually toggle the bitrate.', timestamp: '00:10', type: 'workaround' },
+        { quote: 'A card in the box explaining that macOS requires a manual switch would have saved me thirty minutes.', timestamp: '00:19', type: 'friction' }
       ]
     }
   }
@@ -140,9 +141,8 @@ function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(INITIAL_SAMPLES, null, 2), 'utf-8');
-  }
+  // overwrite with consumer sample data
+  fs.writeFileSync(DATA_FILE, JSON.stringify(CONSUMER_SAMPLES, null, 2), 'utf-8');
 }
 
 export function getAllInterviews(): InterviewRecord[] {
@@ -164,7 +164,6 @@ export function getInterviewById(id: string): InterviewRecord | undefined {
 export function saveInterview(record: InterviewRecord): void {
   ensureDataFile();
   const interviews = getAllInterviews();
-  // prepend newly recorded interview
   interviews.unshift(record);
   fs.writeFileSync(DATA_FILE, JSON.stringify(interviews, null, 2), 'utf-8');
 }
