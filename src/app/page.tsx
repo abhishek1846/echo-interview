@@ -1,275 +1,448 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, ArrowRight, ShieldCheck, Truck, Headphones, Sliders, Volume2, Check } from 'lucide-react';
-import EchoWidget from '@/components/EchoWidget';
+import { 
+  Mic, 
+  MicOff, 
+  Volume2, 
+  VolumeX, 
+  ArrowRight, 
+  RotateCcw, 
+  Send, 
+  CheckCircle2, 
+  Terminal,
+  Activity,
+  Layers,
+  Sparkles
+} from 'lucide-react';
+import { ConversationTurn } from '@/lib/types';
 
-export default function Home() {
-  const [selectedColor, setSelectedColor] = useState<'black' | 'aluminum' | 'sand'>('black');
-  const [addedToCart, setAddedToCart] = useState(false);
+export default function ConversationalSurveyPage() {
+  const [sessionState, setSessionState] = useState<'idle' | 'agent_speaking' | 'listening' | 'thinking' | 'completed'>('idle');
+  const [turns, setTurns] = useState<ConversationTurn[]>([]);
+  const [currentTranscript, setCurrentTranscript] = useState('');
+  const [voiceMuted, setVoiceMuted] = useState(false);
+  const [micActive, setMicActive] = useState(false);
+  const [completedRecordId, setCompletedRecordId] = useState<string | null>(null);
 
-  const handleAddToCart = () => {
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll transcript
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [turns, currentTranscript]);
+
+  // Initialize Speech Synthesis & Speech Recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      synthRef.current = window.speechSynthesis;
+
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event: any) => {
+          let interim = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              const final = event.results[i][0].transcript.trim();
+              if (final) {
+                handleUserSubmit(final);
+              }
+            } else {
+              interim += event.results[i][0].transcript;
+            }
+          }
+          setCurrentTranscript(interim);
+        };
+
+        recognition.onerror = (e: any) => {
+          console.error('Speech recognition error:', e);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
+
+  // Speak agent utterance out loud
+  const speakText = (text: string, onEnd?: () => void) => {
+    if (!synthRef.current || voiceMuted) {
+      if (onEnd) onEnd();
+      return;
+    }
+
+    synthRef.current.cancel(); // stop any active speech
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    // Pick a natural English voice if available
+    const voices = synthRef.current.getVoices();
+    const naturalVoice = voices.find(
+      (v) => (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')) && v.lang.startsWith('en')
+    );
+    if (naturalVoice) {
+      utterance.voice = naturalVoice;
+    }
+
+    setSessionState('agent_speaking');
+
+    utterance.onend = () => {
+      setSessionState('listening');
+      startListening();
+      if (onEnd) onEnd();
+    };
+
+    utterance.onerror = () => {
+      setSessionState('listening');
+      startListening();
+      if (onEnd) onEnd();
+    };
+
+    synthRef.current.speak(utterance);
+  };
+
+  const startListening = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+        setMicActive(true);
+      } catch (err) {
+        // already started
+      }
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+        setMicActive(false);
+      } catch (err) {
+        // ignore
+      }
+    }
+  };
+
+  // Start the voice survey session
+  const startSurvey = async () => {
+    setTurns([]);
+    setCurrentTranscript('');
+    setSessionState('thinking');
+
+    try {
+      const res = await fetch('/api/survey/turn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productName: 'Kroma Audio', history: [] }),
+      });
+
+      const data = await res.json();
+      setTurns(data.turns);
+
+      // Agent speaks Turn 1 out loud
+      speakText(data.agentReply);
+    } catch (err) {
+      console.error('Failed to start survey:', err);
+      setSessionState('idle');
+    }
+  };
+
+  // Submit user response (via voice speech or manual text)
+  const handleUserSubmit = async (text: string) => {
+    if (!text.trim()) return;
+
+    stopListening();
+    setCurrentTranscript('');
+    setSessionState('thinking');
+
+    try {
+      const res = await fetch('/api/survey/turn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: 'Kroma Audio',
+          history: turns,
+          userMessage: text,
+        }),
+      });
+
+      const data = await res.json();
+      setTurns(data.turns);
+
+      if (data.isComplete) {
+        setCompletedRecordId(data.recordId);
+        speakText(data.agentReply, () => {
+          setSessionState('completed');
+        });
+      } else {
+        // Agent speaks follow-up question out loud
+        speakText(data.agentReply);
+      }
+    } catch (err) {
+      console.error('Turn error:', err);
+      setSessionState('listening');
+    }
   };
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col font-sans selection:bg-zinc-200 selection:text-zinc-900">
-      {/* Top Brand Navigation */}
-      <nav className="border-b border-zinc-200 bg-white/90 backdrop-blur-md px-6 py-4 sticky top-0 z-40">
-        <div className="max-w-6xl w-full mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs tracking-tighter shadow-sm">
-              K
-            </div>
-            <span className="font-mono text-xs font-semibold tracking-widest uppercase text-zinc-950">
-              KROMA // ACOUSTICS
-            </span>
+      {/* Top Navbar */}
+      <header className="border-b border-zinc-200 bg-white/90 backdrop-blur-md px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 rounded bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs tracking-tighter shadow-sm">
+            E
           </div>
-
-          <div className="hidden md:flex items-center gap-6 font-mono text-xs text-zinc-500">
-            <span className="text-zinc-900 font-medium cursor-pointer">HEADPHONES</span>
-            <span className="hover:text-zinc-900 cursor-pointer transition-colors">MONITORS</span>
-            <span className="hover:text-zinc-900 cursor-pointer transition-colors">DACS & AMPS</span>
-            <span className="hover:text-zinc-900 cursor-pointer transition-colors">ACCESSORIES</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-200 transition-colors text-xs font-mono"
-            >
-              <span>TELEMETRY_DASHBOARD</span>
-              <ArrowRight className="w-3 h-3 text-zinc-500" />
-            </Link>
-
-            <button className="relative p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200 transition-colors">
-              <ShoppingBag className="w-3.5 h-3.5" />
-              {addedToCart && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500"></span>
-              )}
-            </button>
-          </div>
+          <span className="font-mono text-xs font-semibold tracking-wider uppercase text-zinc-950">
+            ECHO // VOICE_SURVEY_STUDIO
+          </span>
+          <span className="font-mono text-[10px] text-zinc-500 bg-zinc-100 border border-zinc-200 px-2 py-0.5 rounded hidden sm:inline-block">
+            MOM_TEST_PROTOCOL
+          </span>
         </div>
-      </nav>
 
-      {/* Hero Showcase: Model-1 Headphones */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-12 flex flex-col gap-14">
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Product Visuals */}
-          <div className="lg:col-span-7 bg-white border border-zinc-200 rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center relative overflow-hidden group shadow-sm">
-            <div className="absolute top-4 left-4 font-mono text-[10px] text-zinc-400 uppercase tracking-widest">
-              SERIES_01 // PLANAR_MAGNETIC
-            </div>
-
-            {/* Stylized Minimalist Product Render */}
-            <div className="w-64 h-64 sm:w-80 sm:h-80 relative flex items-center justify-center my-6">
-              <div className="absolute inset-0 rounded-full border border-dashed border-zinc-200"></div>
-              <div className="w-56 h-56 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center shadow-inner">
-                <Headphones className="w-28 h-28 text-zinc-800 stroke-[1.2] transition-transform duration-500 group-hover:scale-105" />
-              </div>
-            </div>
-
-            {/* Hardware Telemetry Spec Bar */}
-            <div className="grid grid-cols-3 gap-4 w-full border-t border-zinc-100 pt-4 mt-2 font-mono text-center text-xs">
-              <div>
-                <span className="text-[10px] text-zinc-400 block uppercase">Driver</span>
-                <span className="text-zinc-800 font-medium">50mm Planar</span>
-              </div>
-              <div className="border-x border-zinc-200">
-                <span className="text-[10px] text-zinc-400 block uppercase">Response</span>
-                <span className="text-zinc-800 font-medium">5Hz - 45kHz</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-zinc-400 block uppercase">Weight</span>
-                <span className="text-zinc-800 font-medium">312g CNC Alum</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Purchasing & Customizer */}
-          <div className="lg:col-span-5 flex flex-col gap-6 text-left">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-[10px] font-mono text-zinc-600 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                IN_STOCK // SHIPS_TODAY
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 mb-2">
-                Kroma Model-1
-              </h1>
-              <p className="text-xs text-zinc-600 leading-relaxed">
-                Precision open-back planar headphones designed for critical mixing and reference listening. CNC machined aerospace aluminum with magnetic lambskin cushions.
-              </p>
-            </div>
-
-            <div className="flex items-baseline gap-3 pb-4 border-b border-zinc-200">
-              <span className="font-mono text-3xl font-medium text-zinc-950">$289</span>
-              <span className="text-xs text-zinc-400 line-through">$349</span>
-              <span className="font-mono text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
-                SAVE $60
-              </span>
-            </div>
-
-            {/* Finish Selector */}
-            <div>
-              <div className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2.5">
-                Chassis Finish: <span className="text-zinc-900 font-medium capitalize">{selectedColor}</span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setSelectedColor('black')}
-                  className={`flex-1 py-2 px-3 rounded-lg border text-xs font-mono transition-all ${
-                    selectedColor === 'black'
-                      ? 'border-zinc-900 bg-zinc-900 text-white'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
-                  }`}
-                >
-                  Matte Black
-                </button>
-                <button
-                  onClick={() => setSelectedColor('aluminum')}
-                  className={`flex-1 py-2 px-3 rounded-lg border text-xs font-mono transition-all ${
-                    selectedColor === 'aluminum'
-                      ? 'border-zinc-900 bg-zinc-900 text-white'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
-                  }`}
-                >
-                  Raw Aluminum
-                </button>
-                <button
-                  onClick={() => setSelectedColor('sand')}
-                  className={`flex-1 py-2 px-3 rounded-lg border text-xs font-mono transition-all ${
-                    selectedColor === 'sand'
-                      ? 'border-zinc-900 bg-zinc-900 text-white'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
-                  }`}
-                >
-                  Sand Dunes
-                </button>
-              </div>
-            </div>
-
-            {/* Purchasing Action */}
-            <div className="flex flex-col gap-2.5">
-              <button
-                onClick={handleAddToCart}
-                className="w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 text-white font-medium rounded-xl text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
-              >
-                {addedToCart ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Added to Cart</span>
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag className="w-3.5 h-3.5" />
-                    <span>Add to Bag - $289</span>
-                  </>
-                )}
-              </button>
-
-              <div className="grid grid-cols-2 gap-2 font-mono text-[10px] text-zinc-500 pt-1">
-                <div className="flex items-center gap-1.5">
-                  <Truck className="w-3 h-3 text-zinc-500" />
-                  <span>Free Worldwide Shipping</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3 h-3 text-zinc-500" />
-                  <span>30-Day In-Home Trial</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Catalog Section: Complementary Audio Hardware */}
-        <section className="border-t border-zinc-200 pt-10">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-zinc-700">
-              STUDIO_COMPONENTS // HARDWARE_ECOSYSTEM
-            </h2>
-            <span className="font-mono text-[10px] text-zinc-400">3 ITEMS LISTED</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white border border-zinc-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
-              <div>
-                <div className="p-2 w-fit rounded bg-zinc-100 text-zinc-800 border border-zinc-200 mb-3">
-                  <Sliders className="w-4 h-4" />
-                </div>
-                <h3 className="font-semibold text-sm text-zinc-950 mb-1">Kroma DAC-Mini</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed mb-4">
-                  32-bit / 384kHz balanced portable amplifier with ES9038Q2M chip. Drives high-impedance loads with zero floor noise.
-                </p>
-              </div>
-              <div className="flex items-center justify-between pt-3 border-t border-zinc-100 font-mono text-xs">
-                <span className="text-zinc-950 font-medium">$149</span>
-                <span className="text-zinc-400 text-[10px]">USB-C LOSSLESS</span>
-              </div>
-            </div>
-
-            <div className="bg-white border border-zinc-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
-              <div>
-                <div className="p-2 w-fit rounded bg-zinc-100 text-zinc-800 border border-zinc-200 mb-3">
-                  <Volume2 className="w-4 h-4" />
-                </div>
-                <h3 className="font-semibold text-sm text-zinc-950 mb-1">Magnetic Lambskin Cushions</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed mb-4">
-                  Perforated memory foam cushions wrapped in full-grain Italian lambskin. Magnetic snap-lock for instant replacement.
-                </p>
-              </div>
-              <div className="flex items-center justify-between pt-3 border-t border-zinc-100 font-mono text-xs">
-                <span className="text-zinc-950 font-medium">$38</span>
-                <span className="text-zinc-400 text-[10px]">PAIR // MODULAR</span>
-              </div>
-            </div>
-
-            <div className="bg-white border border-zinc-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
-              <div>
-                <div className="p-2 w-fit rounded bg-zinc-100 text-zinc-800 border border-zinc-200 mb-3">
-                  <Headphones className="w-4 h-4" />
-                </div>
-                <h3 className="font-semibold text-sm text-zinc-950 mb-1">Anodized Desk Mount</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed mb-4">
-                  Solid 450g weighted aluminum stand with silicone base pad to prevent desk scratches and preserve headband shape.
-                </p>
-              </div>
-              <div className="flex items-center justify-between pt-3 border-t border-zinc-100 font-mono text-xs">
-                <span className="text-zinc-950 font-medium">$65</span>
-                <span className="text-zinc-400 text-[10px]">ALUMINUM CNC</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Consumer Research Callout Bar */}
-        <section className="bg-white border border-zinc-200 rounded-2xl p-6 font-mono text-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
-          <div className="max-w-xl text-left">
-            <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-1">
-              Live AssemblyAI Integration Showcase
-            </span>
-            <p className="text-zinc-700 leading-relaxed">
-              Consumer brands lose customers to unspoken checkout doubts (customs, cable lengths, macOS setup). Echo gives shoppers an effortless 90-second voice channel to voice hesitation.
-            </p>
-          </div>
+        <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="shrink-0 flex items-center gap-1.5 bg-zinc-900 text-white font-medium px-4 py-2 rounded-xl text-xs hover:bg-zinc-800 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-200 transition-colors text-xs font-mono font-medium"
           >
-            <span>View Discovered Friction</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>TELEMETRY_DASHBOARD</span>
+            <ArrowRight className="w-3 h-3 text-zinc-500" />
           </Link>
-        </section>
+        </div>
+      </header>
+
+      {/* Main Conversational Stage */}
+      <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-8 flex flex-col gap-6">
+        {/* Survey Header Banner */}
+        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-[10px] font-mono text-zinc-600 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              ACTIVE_TARGET // KROMA_AUDIO
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950">
+              Post-Experience Voice Survey
+            </h1>
+            <p className="text-xs text-zinc-500 leading-relaxed max-w-lg mt-1">
+              Echo conducts a 90-second conversational interview using The Mom Test protocol. It speaks questions out loud and probes for real user friction.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setVoiceMuted(!voiceMuted)}
+              title={voiceMuted ? 'Unmute AI voice' : 'Mute AI voice'}
+              className="p-2 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 transition-colors"
+            >
+              {voiceMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+            {sessionState !== 'idle' && (
+              <button
+                onClick={startSurvey}
+                title="Restart survey"
+                className="p-2 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Live Audio Visualizer Stage */}
+        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden">
+          {sessionState === 'idle' && (
+            <div className="py-8 flex flex-col items-center max-w-sm">
+              <div className="w-14 h-14 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center mb-4 text-zinc-900 shadow-sm">
+                <Volume2 className="w-6 h-6" />
+              </div>
+              <h2 className="text-base font-semibold text-zinc-900 mb-1">
+                Start Conversational Survey
+              </h2>
+              <p className="text-xs text-zinc-500 leading-relaxed mb-6">
+                Echo will speak an opening question out loud. Speak back naturally to share your experience with Kroma Audio.
+              </p>
+              <button
+                onClick={startSurvey}
+                className="py-2.5 px-6 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-mono font-medium transition-colors shadow-sm flex items-center gap-2"
+              >
+                <Mic className="w-4 h-4" />
+                <span>START_VOICE_SESSION (90S)</span>
+              </button>
+            </div>
+          )}
+
+          {(sessionState === 'agent_speaking' || sessionState === 'listening' || sessionState === 'thinking') && (
+            <div className="py-4 w-full flex flex-col items-center">
+              {/* Dynamic Status Indicator */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border mb-4 font-mono text-[11px] transition-all bg-zinc-50 border-zinc-200 text-zinc-800">
+                {sessionState === 'agent_speaking' && (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                    <span>ECHO IS SPEAKING OUT LOUD...</span>
+                  </>
+                )}
+                {sessionState === 'listening' && (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                    <span className="text-rose-700 font-semibold">LISTENING TO YOU (SPEAK FREELY)...</span>
+                  </>
+                )}
+                {sessionState === 'thinking' && (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-spin"></span>
+                    <span>ECHO IS ANALYZING RESPONSE...</span>
+                  </>
+                )}
+              </div>
+
+              {/* Rhythmic Speech Bar Visualizer */}
+              <div className="flex items-center gap-1.5 h-16 mb-4">
+                {[40, 65, 30, 85, 55, 95, 45, 75, 35, 90, 60, 40].map((height, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      height:
+                        sessionState === 'agent_speaking'
+                          ? `${Math.max(8, (height * (Math.sin(Date.now() / 200 + i) + 1.2)) / 2)}px`
+                          : sessionState === 'listening'
+                          ? `${Math.max(6, (height * 0.4))}px`
+                          : '4px',
+                    }}
+                    className={`w-1 rounded-full transition-all duration-150 ${
+                      sessionState === 'agent_speaking'
+                        ? 'bg-zinc-950'
+                        : sessionState === 'listening'
+                        ? 'bg-rose-500'
+                        : 'bg-zinc-300'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Current Live Transcription Stream */}
+              {sessionState === 'listening' && (
+                <div className="w-full max-w-md bg-zinc-50 border border-zinc-200 rounded-xl p-3 text-xs text-zinc-700 min-h-12 flex items-center justify-center font-mono">
+                  {currentTranscript ? (
+                    <span>&ldquo;{currentTranscript}&rdquo;</span>
+                  ) : (
+                    <span className="text-zinc-400 italic">Listening for speech...</span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {sessionState === 'completed' && (
+            <div className="py-6 flex flex-col items-center max-w-sm">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mb-3">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h2 className="text-base font-semibold text-zinc-950 mb-1">
+                Survey Session Completed
+              </h2>
+              <p className="text-xs text-zinc-500 leading-relaxed mb-5">
+                The conversation transcript was processed through AssemblyAI Speech Intelligence and indexed for the team.
+              </p>
+              <div className="flex gap-2">
+                <Link
+                  href="/dashboard"
+                  className="py-2 px-4 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-sm"
+                >
+                  <span>VIEW_IN_DASHBOARD</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <button
+                  onClick={startSurvey}
+                  className="py-2 px-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-mono transition-colors border border-zinc-200"
+                >
+                  RESTART
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Live Multi-Turn Dialogue Transcript */}
+        {turns.length > 0 && (
+          <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-150">
+              <div className="flex items-center gap-2 font-mono text-xs font-semibold text-zinc-700">
+                <Terminal className="w-3.5 h-3.5 text-zinc-500" />
+                <span>LIVE_CONVERSATION_TRANSCRIPT ({turns.length} TURNS)</span>
+              </div>
+              <span className="font-mono text-[10px] text-zinc-400">THE_MOM_TEST</span>
+            </div>
+
+            <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+              {turns.map((turn, idx) => (
+                <div
+                  key={turn.id || idx}
+                  className={`flex flex-col gap-1 p-3.5 rounded-xl text-xs ${
+                    turn.role === 'agent'
+                      ? 'bg-zinc-50 border border-zinc-200 text-zinc-900'
+                      : 'bg-zinc-100/70 border border-zinc-200 text-zinc-900 ml-4'
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-mono text-[10px]">
+                    <span className={`font-semibold uppercase ${turn.role === 'agent' ? 'text-zinc-600' : 'text-indigo-600'}`}>
+                      {turn.role === 'agent' ? 'ECHO // AI_RESEARCHER' : 'YOU // CUSTOMER'}
+                    </span>
+                    <span className="text-zinc-400">
+                      {new Date(turn.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </span>
+                  </div>
+                  <p className="leading-relaxed font-normal">{turn.text}</p>
+                </div>
+              ))}
+              <div ref={transcriptEndRef} />
+            </div>
+
+            {/* Quick manual text response option (fallback if microphone is quiet) */}
+            {sessionState === 'listening' && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const input = (e.currentTarget.elements.namedItem('reply') as HTMLInputElement).value;
+                  if (input.trim()) {
+                    handleUserSubmit(input);
+                    e.currentTarget.reset();
+                  }
+                }}
+                className="flex items-center gap-2 pt-2 border-t border-zinc-150"
+              >
+                <input
+                  name="reply"
+                  type="text"
+                  placeholder="Or type your reply here if microphone is muted..."
+                  className="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 font-mono"
+                />
+                <button
+                  type="submit"
+                  className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white transition-colors"
+                  title="Send response"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* Footer Technical Note */}
+        <div className="text-center font-mono text-[10px] text-zinc-400 py-2">
+          ECHO SURVEY ENGINE // FULL-DUPLEX TWO-WAY SPEECH & ASSEMBLYAI INTELLIGENCE
+        </div>
       </main>
-
-      {/* Modern Minimal Footer */}
-      <footer className="border-t border-zinc-200 px-6 py-5 text-center font-mono text-[10px] text-zinc-400 bg-white">
-        KROMA ACOUSTICS // POWERED BY ASSEMBLYAI SPEECH INTELLIGENCE & THE MOM TEST
-      </footer>
-
-      {/* Floating Consumer Feedback Widget */}
-      <EchoWidget productName="Kroma Audio" />
     </div>
   );
 }

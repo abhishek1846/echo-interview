@@ -1,3 +1,10 @@
+export interface ConversationTurn {
+  id: string;
+  role: 'agent' | 'user';
+  text: string;
+  timestamp: string;
+}
+
 export interface SentimentResult {
   text: string;
   start: number;
@@ -49,4 +56,5 @@ export interface InterviewRecord {
   sentiment_results: SentimentResult[];
   entities: DetectedEntity[];
   mom_test: MomTestTakeaways;
+  turns?: ConversationTurn[];
 }
