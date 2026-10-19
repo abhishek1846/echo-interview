@@ -3,16 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Users, 
-  AlertTriangle, 
-  Wrench, 
   ArrowLeft, 
-  Play, 
-  Tag, 
-  Sparkles, 
-  Clock, 
   ExternalLink,
-  Quote
+  Clock, 
+  AlertCircle,
+  Wrench,
+  Terminal,
+  Activity,
+  Layers
 } from 'lucide-react';
 import { InterviewRecord } from '@/lib/types';
 
@@ -37,7 +35,6 @@ export default function DashboardPage() {
       });
   }, []);
 
-  // Aggregated Stats
   const totalInterviews = interviews.length;
   const totalFrictions = interviews.reduce(
     (acc, cur) => acc + (cur.mom_test?.friction_points?.length || 0),
@@ -52,110 +49,96 @@ export default function DashboardPage() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans">
-      {/* Top Navbar */}
-      <header className="border-b border-neutral-800 bg-neutral-900/60 backdrop-blur-md px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans">
+      {/* Top Technical Navbar */}
+      <header className="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md px-6 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Demo</span>
+            <span>Overview</span>
           </Link>
-          <div className="h-4 w-px bg-neutral-800 mx-1"></div>
+          <span className="text-zinc-700">/</span>
           <div className="flex items-center gap-2">
-            <div className="p-1 bg-indigo-500/10 rounded border border-indigo-500/20 text-indigo-400">
-              <Sparkles className="w-3.5 h-3.5" />
-            </div>
-            <h1 className="font-semibold text-sm tracking-tight text-white">EchoInterview Dashboard</h1>
-            <span className="text-[11px] bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full border border-neutral-700">
-              AssemblyAI Speech Intelligence
-            </span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <h1 className="font-mono text-xs uppercase tracking-wider text-zinc-200">
+              ECHO // DISCOVERY_LOG
+            </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[11px] text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded">
+            ASSEMBLYAI_INTELLIGENCE
+          </span>
           <Link
             href="https://github.com/abhishek1846/echo-interview"
             target="_blank"
-            className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-850 px-2.5 py-1 rounded-md border border-zinc-800 transition-colors"
           >
-            <span>GitHub</span>
+            <span className="font-mono text-[11px]">REPO</span>
             <ExternalLink className="w-3 h-3" />
           </Link>
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* Main Workspace */}
       <main className="flex-1 p-6 max-w-7xl w-full mx-auto flex flex-col gap-6">
-        {/* Metric Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
-              <span>Total Voice Interviews</span>
-              <Users className="w-4 h-4 text-indigo-400" />
+        {/* Metric Cards Grid - Cartesia / Linear telemetry style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
+              <span>01 // SESSIONS</span>
+              <Activity className="w-3.5 h-3.5 text-zinc-400" />
             </div>
-            <div className="text-2xl font-bold tracking-tight text-white">{totalInterviews}</div>
-            <div className="text-[11px] text-neutral-500 mt-1">90s autonomous user sessions</div>
+            <div className="text-2xl font-mono font-medium tracking-tight text-white">{totalInterviews}</div>
+            <div className="text-[11px] text-zinc-500 mt-1">Recorded qualitative runs</div>
           </div>
 
-          <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
-              <span>Friction Alerts Flagged</span>
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
+              <span>02 // FRICTIONS</span>
+              <AlertCircle className="w-3.5 h-3.5 text-amber-400/80" />
             </div>
-            <div className="text-2xl font-bold tracking-tight text-amber-400">{totalFrictions}</div>
-            <div className="text-[11px] text-neutral-500 mt-1">Negative sentiment moments</div>
+            <div className="text-2xl font-mono font-medium tracking-tight text-amber-400">{totalFrictions}</div>
+            <div className="text-[11px] text-zinc-500 mt-1">Negative sentiment spikes</div>
           </div>
 
-          <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
-              <span>User Workarounds Discovered</span>
-              <Wrench className="w-4 h-4 text-indigo-400" />
+          <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
+              <span>03 // WORKAROUNDS</span>
+              <Wrench className="w-3.5 h-3.5 text-zinc-400" />
             </div>
-            <div className="text-2xl font-bold tracking-tight text-indigo-300">{totalWorkarounds}</div>
-            <div className="text-[11px] text-neutral-500 mt-1">Hacks used when app failed</div>
+            <div className="text-2xl font-mono font-medium tracking-tight text-zinc-200">{totalWorkarounds}</div>
+            <div className="text-[11px] text-zinc-500 mt-1">Unprompted user hacks</div>
           </div>
 
-          <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
-              <span>Frustrated Sessions</span>
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+          <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
+              <span>04 // FRUSTRATION</span>
+              <div className="w-2 h-2 rounded-full bg-rose-500"></div>
             </div>
-            <div className="text-2xl font-bold tracking-tight text-red-400">{frustratedCount}</div>
-            <div className="text-[11px] text-neutral-500 mt-1">High-priority churn signals</div>
+            <div className="text-2xl font-mono font-medium tracking-tight text-rose-400">{frustratedCount}</div>
+            <div className="text-[11px] text-zinc-500 mt-1">High-priority churn signals</div>
           </div>
         </div>
 
-        {/* Master-Detail Split Pane */}
+        {/* Master-Detail Layout */}
         {loading ? (
-          <div className="flex-1 flex items-center justify-center p-12 text-neutral-500 text-sm">
-            Loading interviews from AssemblyAI database...
-          </div>
-        ) : interviews.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-12 border border-dashed border-neutral-800 rounded-2xl text-center">
-            <Users className="w-10 h-10 text-neutral-600 mb-3" />
-            <h3 className="font-semibold text-base mb-1">No interviews recorded yet</h3>
-            <p className="text-xs text-neutral-400 max-w-sm mb-4">
-              Return to the demo page and click the floating widget to record your first 90-second interview.
-            </p>
-            <Link
-              href="/"
-              className="py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
-            >
-              Go to Demo & Record
-            </Link>
+          <div className="flex-1 flex items-center justify-center p-12 text-zinc-500 font-mono text-xs">
+            FETCHING_TELEMETRY...
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
-            {/* Left Column: Interview List (5 cols) */}
-            <div className="lg:col-span-5 bg-neutral-900/30 border border-neutral-800/80 rounded-2xl overflow-hidden flex flex-col">
-              <div className="p-3.5 border-b border-neutral-800 bg-neutral-900/50 flex items-center justify-between text-xs font-medium">
-                <span className="text-neutral-400">Interview Sessions ({interviews.length})</span>
-                <span className="text-[11px] text-neutral-500">Ordered by date</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 items-start">
+            {/* Left Column: Data Grid (5 cols) */}
+            <div className="lg:col-span-5 bg-zinc-900/30 border border-zinc-850 rounded-xl overflow-hidden flex flex-col">
+              <div className="p-3 border-b border-zinc-850 bg-zinc-900/60 flex items-center justify-between font-mono text-[11px]">
+                <span className="text-zinc-400">RECORDED_SESSIONS ({interviews.length})</span>
+                <span className="text-zinc-500">SORT: DESC</span>
               </div>
-              <div className="divide-y divide-neutral-800/60 max-h-[650px] overflow-y-auto">
+              <div className="divide-y divide-zinc-850/60 max-h-[640px] overflow-y-auto">
                 {interviews.map((item) => {
                   const isSelected = selectedInterview?.id === item.id;
                   const overall = item.mom_test?.sentiment_summary?.overall || 'Neutral';
@@ -163,42 +146,42 @@ export default function DashboardPage() {
                     <div
                       key={item.id}
                       onClick={() => setSelectedInterview(item)}
-                      className={`p-4 cursor-pointer transition-colors ${
+                      className={`p-3.5 cursor-pointer transition-colors ${
                         isSelected
-                          ? 'bg-neutral-800/70 border-l-2 border-indigo-500'
-                          : 'hover:bg-neutral-900/60'
+                          ? 'bg-zinc-850/70 border-l-2 border-white'
+                          : 'hover:bg-zinc-900/50'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-semibold text-xs text-neutral-200">{item.product_name}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
-                              overall === 'Frustrated'
-                                ? 'bg-red-950/60 text-red-300 border-red-800/40'
-                                : overall === 'Positive'
-                                ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/40'
-                                : 'bg-neutral-800 text-neutral-400 border-neutral-700'
-                            }`}
-                          >
-                            {overall}
-                          </span>
-                        </div>
+                        <span className="font-mono text-xs font-medium text-zinc-200 tracking-tight">
+                          {item.id}
+                        </span>
+                        <span
+                          className={`font-mono text-[10px] px-2 py-0.5 rounded border ${
+                            overall === 'Frustrated'
+                              ? 'bg-rose-950/40 text-rose-300 border-rose-800/40'
+                              : overall === 'Positive'
+                              ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/40'
+                              : 'bg-zinc-900 text-zinc-400 border-zinc-800'
+                          }`}
+                        >
+                          {overall.toUpperCase()}
+                        </span>
                       </div>
 
-                      <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed mb-2">
+                      <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed mb-2 font-normal">
                         {item.transcript_text}
                       </p>
 
-                      <div className="flex items-center gap-3 text-[11px] text-neutral-500">
+                      <div className="flex items-center gap-3 font-mono text-[10px] text-zinc-500">
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
+                          <Clock className="w-3 h-3 text-zinc-400" />
                           {item.duration_seconds}s
                         </span>
                         <span>•</span>
                         <span>{new Date(item.created_at).toLocaleDateString()}</span>
                         <span>•</span>
-                        <span className="text-amber-400/90 font-mono">
+                        <span className="text-amber-400/90">
                           {item.mom_test?.friction_points?.length || 0} friction
                         </span>
                       </div>
@@ -208,49 +191,47 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Right Column: Detail Inspector (7 cols) */}
+            {/* Right Column: Inspector Panel (7 cols) */}
             {selectedInterview && (
-              <div className="lg:col-span-7 bg-neutral-900/30 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-6">
+              <div className="lg:col-span-7 bg-zinc-900/30 border border-zinc-850 rounded-xl p-5 flex flex-col gap-5">
                 {/* Header */}
-                <div className="flex items-start justify-between pb-4 border-b border-neutral-800">
+                <div className="flex items-start justify-between pb-3.5 border-b border-zinc-850">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-base font-bold text-white tracking-tight">
-                        {selectedInterview.product_name} Feedback
-                      </h2>
-                      <span className="text-xs font-mono text-neutral-500">({selectedInterview.id})</span>
+                      <span className="font-mono text-sm font-semibold text-white">
+                        {selectedInterview.product_name}
+                      </span>
+                      <span className="font-mono text-xs text-zinc-500">[{selectedInterview.id}]</span>
                     </div>
-                    <p className="text-xs text-neutral-400">
-                      Recorded on {new Date(selectedInterview.created_at).toLocaleString()} • Duration: {selectedInterview.duration_seconds}s
-                    </p>
+                    <div className="font-mono text-[11px] text-zinc-400">
+                      INDEXED // {new Date(selectedInterview.created_at).toLocaleString()} • DURATION: {selectedInterview.duration_seconds}s
+                    </div>
                   </div>
                 </div>
 
                 {/* AssemblyAI Executive Summary */}
-                <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-300">
-                      AssemblyAI Speech Intelligence Summary
-                    </h3>
+                <div className="bg-zinc-900/60 border border-zinc-850 rounded-lg p-3.5">
+                  <div className="flex items-center gap-2 mb-2 font-mono text-[10px] text-zinc-400 uppercase tracking-wider">
+                    <Terminal className="w-3 h-3" />
+                    <span>AssemblyAI Speech Intelligence Summary</span>
                   </div>
-                  <div className="text-xs text-neutral-300 whitespace-pre-line leading-relaxed">
+                  <div className="text-xs text-zinc-300 whitespace-pre-line leading-relaxed">
                     {selectedInterview.summary}
                   </div>
                 </div>
 
                 {/* Mom Test Qualitative Analysis: Friction & Workaround */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Friction Points */}
-                  <div className="bg-red-950/20 border border-red-900/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-red-400 mb-2">
-                      <AlertTriangle className="w-4 h-4" />
-                      <h4 className="text-xs font-semibold uppercase tracking-wider">Points of Friction</h4>
+                  <div className="bg-zinc-900/40 border border-zinc-850 rounded-lg p-3.5">
+                    <div className="flex items-center gap-1.5 text-rose-400 mb-2 font-mono text-[10px] uppercase tracking-wider">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      <span>Friction Moments</span>
                     </div>
-                    <ul className="space-y-2">
+                    <ul className="space-y-1.5">
                       {selectedInterview.mom_test?.friction_points?.map((fp, idx) => (
-                        <li key={idx} className="text-xs text-neutral-300 flex items-start gap-2">
-                          <span className="text-red-400 mt-0.5">•</span>
+                        <li key={idx} className="text-xs text-zinc-300 flex items-start gap-2">
+                          <span className="text-rose-400 font-mono mt-0.5">•</span>
                           <span>{fp}</span>
                         </li>
                       ))}
@@ -258,15 +239,15 @@ export default function DashboardPage() {
                   </div>
 
                   {/* User Workarounds */}
-                  <div className="bg-indigo-950/20 border border-indigo-900/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-indigo-400 mb-2">
-                      <Wrench className="w-4 h-4" />
-                      <h4 className="text-xs font-semibold uppercase tracking-wider">Unprompted Workarounds</h4>
+                  <div className="bg-zinc-900/40 border border-zinc-850 rounded-lg p-3.5">
+                    <div className="flex items-center gap-1.5 text-zinc-300 mb-2 font-mono text-[10px] uppercase tracking-wider">
+                      <Wrench className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Workaround Resorted</span>
                     </div>
-                    <ul className="space-y-2">
+                    <ul className="space-y-1.5">
                       {selectedInterview.mom_test?.user_workarounds?.map((w, idx) => (
-                        <li key={idx} className="text-xs text-neutral-300 flex items-start gap-2">
-                          <span className="text-indigo-400 mt-0.5">•</span>
+                        <li key={idx} className="text-xs text-zinc-300 flex items-start gap-2">
+                          <span className="text-zinc-500 font-mono mt-0.5">•</span>
                           <span>{w}</span>
                         </li>
                       ))}
@@ -274,21 +255,20 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Direct Friction Quotes */}
+                {/* Direct Quotes */}
                 {selectedInterview.mom_test?.key_quotes && selectedInterview.mom_test.key_quotes.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-3 flex items-center gap-2">
-                      <Quote className="w-3.5 h-3.5 text-indigo-400" />
+                    <div className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
                       Grounded Audio Quotes
-                    </h4>
-                    <div className="space-y-2">
+                    </div>
+                    <div className="space-y-1.5">
                       {selectedInterview.mom_test.key_quotes.map((q, idx) => (
                         <div
                           key={idx}
-                          className="p-3 bg-neutral-900/50 border border-neutral-800 rounded-lg flex items-start justify-between text-xs"
+                          className="p-2.5 bg-zinc-900/50 border border-zinc-850 rounded-md flex items-start justify-between text-xs"
                         >
-                          <span className="italic text-neutral-300">&ldquo;{q.quote}&rdquo;</span>
-                          <span className="font-mono text-[10px] text-neutral-500 ml-4 shrink-0 bg-neutral-800 px-2 py-0.5 rounded">
+                          <span className="text-zinc-300 font-normal">&ldquo;{q.quote}&rdquo;</span>
+                          <span className="font-mono text-[10px] text-zinc-500 ml-3 shrink-0 bg-zinc-850 px-1.5 py-0.5 rounded">
                             {q.timestamp}
                           </span>
                         </div>
@@ -300,17 +280,17 @@ export default function DashboardPage() {
                 {/* Entities Detected */}
                 {selectedInterview.entities && selectedInterview.entities.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2 flex items-center gap-2">
-                      <Tag className="w-3.5 h-3.5 text-neutral-400" />
-                      Entities & Products Mentioned
-                    </h4>
+                    <div className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Layers className="w-3 h-3" />
+                      <span>Entities & Concepts Detected</span>
+                    </div>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedInterview.entities.map((e, idx) => (
                         <span
                           key={idx}
-                          className="text-[11px] bg-neutral-900 border border-neutral-800 text-neutral-300 px-2.5 py-1 rounded-md"
+                          className="font-mono text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 px-2 py-0.5 rounded"
                         >
-                          {e.text} <span className="text-[9px] text-neutral-500 font-mono">({e.entity_type})</span>
+                          {e.text} <span className="text-zinc-500">[{e.entity_type}]</span>
                         </span>
                       ))}
                     </div>
@@ -319,17 +299,17 @@ export default function DashboardPage() {
 
                 {/* Full Transcript */}
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-3">
-                    Full Diarized Transcript
-                  </h4>
-                  <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 max-h-56 overflow-y-auto space-y-3 font-mono text-xs text-neutral-300 leading-relaxed">
+                  <div className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
+                    Diarized Transcript Feed
+                  </div>
+                  <div className="bg-zinc-950 border border-zinc-850 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 font-mono text-[11px] text-zinc-300 leading-relaxed">
                     {selectedInterview.utterances && selectedInterview.utterances.length > 0 ? (
                       selectedInterview.utterances.map((u, idx) => (
-                        <div key={idx} className="flex gap-3">
-                          <span className="text-indigo-400 font-semibold shrink-0">
-                            Speaker {u.speaker} [{(u.start / 1000).toFixed(1)}s]:
+                        <div key={idx} className="flex gap-2">
+                          <span className="text-zinc-500 shrink-0">
+                            [{u.speaker} {(u.start / 1000).toFixed(1)}s]:
                           </span>
-                          <span className="text-neutral-300">{u.text}</span>
+                          <span className="text-zinc-300">{u.text}</span>
                         </div>
                       ))
                     ) : (

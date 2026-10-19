@@ -1,130 +1,104 @@
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Usb, ShieldCheck, Sparkles, LayoutDashboard } from 'lucide-react';
+import { BookOpen, Usb, ShieldCheck, ArrowRight } from 'lucide-react';
 import EchoWidget from '@/components/EchoWidget';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
-      {/* Hackathon Demo Notice Banner */}
-      <div className="bg-gradient-to-r from-indigo-950/80 via-neutral-900 to-indigo-950/80 border-b border-indigo-900/40 px-4 py-2.5 text-xs text-neutral-300 flex items-center justify-between">
-        <div className="flex items-center gap-2 mx-auto sm:mx-0">
-          <span className="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse"></span>
-          <span>
-            <strong>EchoInterview Live Demo:</strong> Test the autonomous 90s voice interviewer via the floating widget in the bottom-right.
-          </span>
-        </div>
-        <Link
-          href="/dashboard"
-          className="hidden sm:flex items-center gap-1.5 font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
-        >
-          <span>Open Founder Dashboard</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </div>
-
-      {/* Navigation */}
-      <nav className="border-b border-neutral-900 px-6 py-4 flex items-center justify-between max-w-6xl w-full mx-auto">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
+      {/* Sleek Minimalist Top Navigation */}
+      <nav className="border-b border-zinc-850 px-6 py-3.5 flex items-center justify-between max-w-6xl w-full mx-auto">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
-            <BookOpen className="w-4 h-4" />
+          <div className="w-6 h-6 rounded-md bg-white text-zinc-950 flex items-center justify-center font-bold text-xs shadow-sm">
+            G
           </div>
-          <span className="font-bold text-base tracking-tight text-white">Gatsby</span>
-          <span className="text-[10px] bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full border border-neutral-700">
-            Host App Demo
+          <span className="font-semibold text-sm tracking-tight text-white">Gatsby</span>
+          <span className="font-mono text-[10px] text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+            DEMO_SURFACE
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-medium">
+        <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 px-3.5 py-2 rounded-xl border border-neutral-800 transition-all hover:border-neutral-700"
+            className="flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-850 text-zinc-200 px-3 py-1.5 rounded-lg border border-zinc-800 transition-colors text-xs font-medium"
           >
-            <LayoutDashboard className="w-3.5 h-3.5 text-indigo-400" />
             <span>Founder Dashboard</span>
+            <ArrowRight className="w-3 h-3 text-zinc-400" />
           </Link>
         </div>
       </nav>
 
-      {/* Hero Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-950/50 border border-indigo-800/40 text-indigo-300 text-xs font-medium mb-6">
-          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-          <span>AssemblyAI Speech Intelligence Showcase</span>
+      {/* Main Showcase */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center max-w-4xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 font-mono text-[11px] text-zinc-400 mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>ECHO_INTERVIEW // EMBEDDED_WIDGET</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-2xl leading-[1.1] mb-6">
-          The modern e-reader library for macOS.
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white max-w-2xl leading-[1.15] mb-5">
+          The offline e-reader companion for macOS.
         </h1>
 
-        <p className="text-base sm:text-lg text-neutral-400 max-w-xl mb-10 leading-relaxed">
-          Gatsby is a lightweight, 100% offline companion for Kindle and Kobo. Fast book management with zero telemetry and automatic APNX page numbering.
+        <p className="text-sm sm:text-base text-zinc-400 max-w-lg mb-12 leading-relaxed">
+          Gatsby is a lightweight, local-first library manager for Kindle and Kobo. Fast book management with zero telemetry.
         </p>
 
-        {/* Feature Cards Grid (Representing the Host App) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full text-left mb-16">
-          <div className="p-5 rounded-2xl bg-neutral-900/40 border border-neutral-800/80">
-            <div className="p-2 w-fit rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <h3 className="font-semibold text-sm mb-1 text-white">100% Offline & Private</h3>
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Never connects to the cloud. Your books, metadata, and reading history stay exclusively on your local machine.
+        {/* Feature Cards Grid (Representing the Host Application) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full text-left mb-14">
+          <div className="p-4 rounded-xl bg-zinc-900/30 border border-zinc-850">
+            <ShieldCheck className="w-4 h-4 text-zinc-300 mb-2.5" />
+            <h3 className="font-medium text-xs mb-1 text-zinc-200">100% Offline & Private</h3>
+            <p className="text-[11px] text-zinc-400 leading-normal">
+              Never connects to the cloud. Your books and metadata stay on your local disk.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/40 border border-neutral-800/80">
-            <div className="p-2 w-fit rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
-              <Usb className="w-4 h-4" />
-            </div>
-            <h3 className="font-semibold text-sm mb-1 text-white">Kindle & Kobo USB Sync</h3>
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Auto-detects plugged-in devices, embeds real covers, and injects custom APNX page numbers directly to Kindle.
+          <div className="p-4 rounded-xl bg-zinc-900/30 border border-zinc-850">
+            <Usb className="w-4 h-4 text-zinc-300 mb-2.5" />
+            <h3 className="font-medium text-xs mb-1 text-zinc-200">Hardware USB Sync</h3>
+            <p className="text-[11px] text-zinc-400 leading-normal">
+              Auto-detects connected Kindles and Kobos. Injects real covers and APNX page numbers.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/40 border border-neutral-800/80">
-            <div className="p-2 w-fit rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
-              <BookOpen className="w-4 h-4" />
-            </div>
-            <h3 className="font-semibold text-sm mb-1 text-white">Clean Native UI</h3>
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Built with Tauri and React. No 500MB Chromium runtimes or legacy menus. Just fast, fluid table sorting and tags.
+          <div className="p-4 rounded-xl bg-zinc-900/30 border border-zinc-850">
+            <BookOpen className="w-4 h-4 text-zinc-300 mb-2.5" />
+            <h3 className="font-medium text-xs mb-1 text-zinc-200">Native Performance</h3>
+            <p className="text-[11px] text-zinc-400 leading-normal">
+              Built with Tauri and React. No 500MB Chromium runtimes or legacy bloat.
             </p>
           </div>
         </div>
 
-        {/* Callout Box Explaining EchoInterview */}
-        <div className="w-full bg-gradient-to-b from-neutral-900/70 to-neutral-950 border border-neutral-800 rounded-2xl p-6 sm:p-8 text-left">
-          <div className="flex items-center gap-2.5 mb-3 text-indigo-400">
-            <Sparkles className="w-4 h-4" />
-            <h3 className="text-sm font-bold uppercase tracking-wider">How This Hackathon Demo Works</h3>
+        {/* Explanation Card */}
+        <div className="w-full bg-zinc-900/20 border border-zinc-850 rounded-xl p-5 text-left font-mono">
+          <div className="flex items-center justify-between pb-3 border-b border-zinc-850 mb-3 text-[11px] text-zinc-400">
+            <span>QUALITATIVE_DISCOVERY_PIPELINE</span>
+            <span className="text-zinc-500">ASSEMBLYAI_CORE</span>
           </div>
-          <p className="text-xs text-neutral-300 leading-relaxed mb-4">
-            Instead of generic surveys or 30-minute user calls, EchoInterview allows users to click the floating button in the bottom right corner to give a <strong>90-second voice walkthrough</strong> of their experience.
-          </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div className="p-3 bg-neutral-950/80 rounded-xl border border-neutral-800">
-              <span className="font-semibold text-white block mb-1">1. Speak Naturally</span>
-              <span className="text-neutral-400">Talk about what you tried to do and any snags you hit.</span>
+            <div>
+              <span className="text-zinc-500 block mb-0.5 text-[10px]">01 // CAPTURE</span>
+              <span className="text-zinc-300 text-[11px]">User speaks 90s feedback in dock widget</span>
             </div>
-            <div className="p-3 bg-neutral-950/80 rounded-xl border border-neutral-800">
-              <span className="font-semibold text-white block mb-1">2. AssemblyAI Processing</span>
-              <span className="text-neutral-400">Generates speech-to-text, diarization, and sentence sentiment.</span>
+            <div>
+              <span className="text-zinc-500 block mb-0.5 text-[10px]">02 // INTELLIGENCE</span>
+              <span className="text-zinc-300 text-[11px]">AssemblyAI diarization & sentiment spikes</span>
             </div>
-            <div className="p-3 bg-neutral-950/80 rounded-xl border border-neutral-800">
-              <span className="font-semibold text-white block mb-1">3. Mom-Test Insights</span>
-              <span className="text-neutral-400">Extracts user workarounds and friction alerts to the dashboard.</span>
+            <div>
+              <span className="text-zinc-500 block mb-0.5 text-[10px]">03 // EXTRACTION</span>
+              <span className="text-zinc-300 text-[11px]">Mom-Test workarounds delivered to dashboard</span>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-900 px-6 py-6 text-center text-xs text-neutral-500">
-        <p>Built for AssemblyAI Voice Hackathon Week 2026 • Powered by AssemblyAI Speech Intelligence</p>
+      {/* Understated Minimal Footer */}
+      <footer className="border-t border-zinc-900 px-6 py-4 text-center font-mono text-[11px] text-zinc-600">
+        ECHOINTERVIEW // POWERED BY ASSEMBLYAI SPEECH INTELLIGENCE
       </footer>
 
-      {/* Floating Echo Widget */}
+      {/* The Sleek Floating Voice Widget */}
       <EchoWidget productName="Gatsby Desktop" />
     </div>
   );
